@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlexLift</title>
+
+    <link rel="stylesheet" href="/public/main.css">
+</head>
+<body>
+    {{ template "topbar" . }}
+
+    <h1>Submit Post</h1>
+
+    <form enctype="multipart/form-data" action="/submitPost" method="POST">
+        <label for="title">Title:</label>
+        <input type="text" id="title" name="title">
+        <br>
+        
+        <label for="description">Description:</label>
+        <input type="text" id="description" name="description">
+        <br>
+
+        <label for="ispr" checked="true">PR?:</label>
+        <input type="checkbox" id="ispr" name="ispr">
+        <br>
+
+        <label for="weight">Weight (lbs):</label>
+        <input type="text" id="weight" name="weight">
+        <br>
+
+        <label for="lift">Lift:</label>
+        <input type="text" id="lift" name="lift">
+        <br>
+
+        <label for="thumbnail">Thumbnail:</label>
+        <input type="file" id="thumbnail" name="thumbnail">
+
+        <input type="submit">
+    </form>    
+</body>
+</html>

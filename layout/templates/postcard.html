@@ -1,0 +1,21 @@
+{{ define "postcard" }}
+    <article class="post-card">    
+        <a href="/post/{{.UUID}}">
+            <h2>{{.Title}}</h2>
+        </a>
+        <h3>{{.Description}}</h3>
+
+        <img src="/upload/post/{{.UUID}}" alt="Lift by {{.UserName}}" class="thumbnail">
+
+        {{if .IsPr}}
+            <p>Pr!</p>
+        {{end}}
+
+        <p>{{.Weight}} lbs on the {{.Lift}}</p>
+        <p>{{.Likes}} likes</p>
+
+        <a href="/user/{{.UserUUID}}">
+            <strong>By {{.UserName}}</strong>
+        </a>
+    </article>
+{{ end }}

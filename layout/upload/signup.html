@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlexLift</title>
+
+    <link rel="stylesheet" href="/public/main.css">
+    <script defer>
+        function checkHandle() {
+            let field = document.getElementById("handle").value
+            let warning = document.getElementById("warning")
+            if (field !== "") {
+                fetch("/handleExists/"+field)
+                    .then(response => response.text())
+                    .then((data) => {
+                            if (data === "true") {
+                                // the handle exists
+                                warning.hidden = false
+                                warning.style.color = "red"
+                                warning.innerText = "That handle is already taken :("
+                            } else if (data === "false") {
+                                // the handle is availible
+                                warning.hidden = false
+                                warning.style.color = "lime"
+                                warning.innerText = "That handle is availible!"
+                            }
+                        })
+                    }
+                }
+    </script>
+</head>
+<body>
+    {{ template "topbar" . }}
+    
+    <h1>Sign Up</h1>
+    
+    <form action="/signupForm" method="POST">
+        <label for="handle">Username (handle):</label>
+        <input type="text" id="handle" name="handle">
+        <button type="button" id="checkhandle" onclick="checkHandle()">Check Availibility</button>
+        <p id="warning" hidden></p>
+        <br>
+        
+        <label for="name">Display name:</label>
+        <input type="text" id="name" name="name">
+        <br>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password">
+        <br>
+
+        <label for="location">Location (optional):</label>
+        <input type="text" id="location" name="location">
+        <br>
+
+        <label for="bio">Bio (optional):</label>
+        <input type="text" id="bio" name="bio">
+        <br>
+
+        <input type="submit">
+    </form>    
+</body>
+</html>
