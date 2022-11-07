@@ -11,6 +11,12 @@ type User struct {
 	UUID string `gorm:"unique"`
 }
 
+type Like struct {
+	PostUUID string
+	UserUUID string
+	UserName string
+}
+
 type Post struct {
 	Title string
 	Description string

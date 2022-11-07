@@ -34,6 +34,7 @@ func main() {
 	app.DB.Table("Users").AutoMigrate(&User{})
 	app.DB.Table("Posts").AutoMigrate(&Post{})
 	app.DB.Table("Auth").AutoMigrate(&Auth{})
+	app.DB.Table("Likes").AutoMigrate(&Like{})
 
 	postcard := "layout/templates/postcard.html"
 	topbar := "layout/templates/topbar.html"
@@ -139,6 +140,21 @@ func main() {
 			return
 		}
 		tmplSubmit.Execute(w, nil)
+	})
+
+	r.HandleFunc("/likePost", func(w http.ResponseWriter, r *http.Request) {
+		cookie, err := r.Cookie("auth")
+		if err != nil {
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte(("Sign in to like")))
+			return
+		}
+		if _, err := app.validateCookie(cookie.Value); err != nil {
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte(("Invalid cookie")))
+			return
+		}
+		
 	})
 
 	r.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 // Returns created user's UUID
@@ -65,6 +66,26 @@ func (a App) getPostByUUID(UUID string) (Post, error) {
 	return post, err
 }
 
+//Like a post
+func (a App) likePost(post Post, user User) error {
+	var has_liked Like
+	err := a.DB.Table("Likes").First(&has_liked, "PostUUID = ? AND UserUUID = ?", post.UUID, user.UUID).Error
+	if err == gorm.ErrRecordNotFound {
+		err := a.DB.Table("Likes").Create(&Like{UserUUID: user.UUID, UserName: user.Name, PostUUID: post.UUID}).Error
+		if err != nil {
+			return err
+		}
+
+		err = a.DB.Table("Posts").Update("likes", gorm.Expr("likes + 1")).Error
+		if err != nil {
+			return err
+		}
+	} else if err != nil {
+		return err
+	}
+
+	return nil
+}
 
 // Limit for how many top posts to get
 //
