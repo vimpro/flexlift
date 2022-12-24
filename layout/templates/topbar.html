@@ -3,14 +3,22 @@
         <a href="/" style="display: inline-block;">
             <h1>FlexLift</h1>
         </a>
-        <a href="/login" style="display: inline-block;">
-            <h2>Log In</h2>
-        </a>
-        <a href="/signup" style="display: inline-block;">
-            <h2>Sign Up</h2>
-        </a>
-        <a href="/submit" style="display: inline-block;">
-            <h2>Submit Post</h2>
-        </a>
+        {{if .SignedIn}}
+            <script>window.signedIn = true</script>
+            <a href="/submit" style="display: inline-block;">
+                <h2>Submit Post</h2>
+            </a>
+            <a href="/user/{{.UUID}}" style="float:right">
+                <h2>My profile</h2>
+            </a>
+        {{else}}
+            <script>window.signedIn = false</script>
+            <a href="/login" style="float: right;">
+                <h2>Log In</h2>
+            </a>
+            <a href="/signup" style="float: right;">
+                <h2>Sign Up</h2>
+            </a>
+        {{end}}
     </nav>
 {{end}}

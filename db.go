@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/base64"
+	"errors"
 	"math/rand"
 	"time"
 
@@ -66,17 +67,26 @@ func (a App) getPostByUUID(UUID string) (Post, error) {
 	return post, err
 }
 
+//gets the most recent posts from a user
+func (a App) getPostsByUser(user User, Limit int, Offset int) ([]Post, error) {
+	var posts []Post
+
+	err := a.DB.Table("Posts").Where("user_uuid = ?", user.UUID).Offset(Offset).Limit(Limit).Find(&posts).Error
+
+	return posts, err
+}
+
 //Like a post
 func (a App) likePost(post Post, user User) error {
 	var has_liked Like
-	err := a.DB.Table("Likes").First(&has_liked, "PostUUID = ? AND UserUUID = ?", post.UUID, user.UUID).Error
-	if err == gorm.ErrRecordNotFound {
+	err := a.DB.Table("Likes").First(&has_liked, "post_uuid = ? AND user_uuid = ?", post.UUID, user.UUID).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
 		err := a.DB.Table("Likes").Create(&Like{UserUUID: user.UUID, UserName: user.Name, PostUUID: post.UUID}).Error
 		if err != nil {
 			return err
 		}
 
-		err = a.DB.Table("Posts").Update("likes", gorm.Expr("likes + 1")).Error
+		err = a.DB.Table("Posts").Where("UUID = ?", post.UUID).Update("likes", post.Likes + 1).Error
 		if err != nil {
 			return err
 		}
@@ -85,6 +95,43 @@ func (a App) likePost(post Post, user User) error {
 	}
 
 	return nil
+}
+
+//remove a like
+func (a App) removeLike(post Post, user User) error {
+	var has_liked Like
+
+	err := a.DB.Table("Likes").First(&has_liked, "post_uuid = ? AND user_uuid = ?", post.UUID, user.UUID).Error
+	if err == gorm.ErrRecordNotFound {
+		return nil
+	} else if err != nil {
+		return err
+	} else {
+		err := a.DB.Table("Likes").Where("post_uuid = ? AND user_uuid = ?", post.UUID, user.UUID).Delete(&Like{}).Error
+		if err != nil {
+			return err
+		}
+
+		err = a.DB.Table("Posts").Where("UUID = ?", post.UUID).Update("likes", post.Likes - 1).Error
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (a App) getLike(post Post, user User) (bool, error) {
+	var has_liked Like
+
+	err := a.DB.Table("Likes").First(&has_liked, "post_uuid = ? AND user_uuid = ?", post.UUID, user.UUID).Error
+	if err == gorm.ErrRecordNotFound {
+		return false, nil
+	} else if err != nil {
+		return false, err
+	} else {
+		return true, nil
+	}
 }
 
 // Limit for how many top posts to get

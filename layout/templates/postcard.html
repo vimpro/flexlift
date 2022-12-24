@@ -1,5 +1,5 @@
 {{ define "postcard" }}
-    <article class="post-card">    
+    <article class="post-card" id="{{.UUID}}">    
         <a href="/post/{{.UUID}}">
             <h2>{{.Title}}</h2>
         </a>
@@ -11,11 +11,22 @@
             <p>Pr!</p>
         {{end}}
 
-        <p>{{.Weight}} lbs on the {{.Lift}}</p>
-        <p>{{.Likes}} likes</p>
+        <p>{{.Weight}} lbs on {{.Lift}}</p>
+        <p id="likeCounter" count="{{.Likes}}">{{.Likes}} likes</p>
+
+        {{if .Liked}}
+            <button onclick="like(this)" id="like" class="liked">Remove like</button>
+        {{else}}
+            <button onclick="like(this)" id="like">Like post</button>
+        {{end}}
 
         <a href="/user/{{.UserUUID}}">
             <strong>By {{.UserName}}</strong>
         </a>
     </article>
+    <style>
+        .liked {
+            background-color: red;
+        }
+    </style>
 {{ end }}

@@ -9,12 +9,12 @@
     <link rel="stylesheet" href="/public/main.css">
 </head>
 <body>
-    {{ template "topbar" . }}
+    {{ template "topbar" .ApplicationState }}
 
     <h1>
         404 Not Found
     </h1>
-    <p>The URL {{.}} was not found</p>
+    <p>The URL {{.Url}} was not found</p>
     <br>
     <a href="/">Go back to the homepage?</a>
 </body>

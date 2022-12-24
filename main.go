@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"html/template"
 	"io"
 	"io/ioutil"
@@ -19,6 +20,31 @@ type App struct {
 
 	Routes []http.HandlerFunc
 	NotFoundHandler http.HandlerFunc
+}
+
+func (a App) genAppState(r *http.Request) ApplicationState {
+	var isLoggedIn bool
+	var user User
+
+	cookie, err := r.Cookie("auth")
+	if err != nil {
+		isLoggedIn = false
+	} else if user, err = app.validateCookie(cookie.Value); err != nil {
+		isLoggedIn = false
+	} else {
+		isLoggedIn = true
+	}
+
+	data := ApplicationState{}
+
+	if isLoggedIn {
+		data.SignedIn = true
+		data.UUID = user.UUID
+	} else {
+		data.SignedIn = false
+	}
+
+	return data
 }
 
 var app App
@@ -49,7 +75,10 @@ func main() {
 
 	r := mux.NewRouter()
 	app.NotFoundHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		tmplNotFound.Execute(w, r.URL.String())
+		tmplNotFound.Execute(w, map[string]interface{}{
+			"Url": r.URL.String(),
+			"ApplicationState": app.genAppState(r),
+		})
 	})
 	r.NotFoundHandler = app.NotFoundHandler
 
@@ -65,54 +94,88 @@ func main() {
 			panic(err)
 		}
 
-		isLoggedIn := false // just for now
+		appstate := app.genAppState(r)
 
-		if isLoggedIn {
-			// handle this later
-		} else {
-			data := FrontPageTmpl{
-				TopPosts: best,
+		if appstate.SignedIn {
+			user, err := app.getUserByUUID(appstate.UUID)
+			if err != nil {
+				fmt.Println("Failed to create user object from UUID")
+
 			}
-
-			tmplFrontPage.Execute(w, data)
+			for i, post := range best {
+				liked, err := app.getLike(post, user)
+				if err != nil {
+					fmt.Println("Failed to get like count")
+				}
+				post.Liked = liked
+				best[i] = post
+			}
 		}
+
+		data := map[string]interface{}{
+			"TopPosts": best,
+			"ApplicationState": app.genAppState(r),
+		}
+
+
+		tmplFrontPage.Execute(w, data)
 
     })
 
 	r.HandleFunc("/post/{uuid}", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 
-		isLoggedIn := false // just for now
-
-		if isLoggedIn {
-			// handle this later
-		} else {
-			data, err := app.getPostByUUID(vars["uuid"])
-			if err != nil {
-				app.NotFoundHandler(w, r)
-				return
-			}
-			tmplPost.Execute(w, data)
+		post, err := app.getPostByUUID(vars["uuid"])
+		if err != nil {
+			app.NotFoundHandler(w, r)
+			return
 		}
+
+		appstate := app.genAppState(r)
+
+		if appstate.SignedIn {
+			user, err := app.getUserByUUID(appstate.UUID)
+			if err != nil {
+				fmt.Println("Failed to create user object from UUID")
+			}
+			liked, err := app.getLike(post, user)
+			if err != nil {
+				fmt.Println("Failed to get like count")
+			}
+			post.Liked = liked
+		}
+
+		data := map[string]interface{}{
+			"Post": post,
+			"ApplicationState": app.genAppState(r),
+		}
+
+		tmplPost.Execute(w, data)
 
     })
 
 	r.HandleFunc("/user/{uuid}", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 
-		isLoggedIn := false // just for now
-
-		if isLoggedIn {
-			// handle this later
-		} else {
-			data, err := app.getUserByUUID(vars["uuid"])
-			if err != nil {
-				app.NotFoundHandler(w, r)
-				return
-			}
-			tmplUser.Execute(w, data)
+		page_user, err := app.getUserByUUID(vars["uuid"])
+		if err != nil {
+			app.NotFoundHandler(w, r)
+			return
 		}
 
+		posts, err := app.getPostsByUser(page_user, 10, 0)
+
+		if err != nil {
+			posts = make([]Post, 0)
+		}
+
+		data := map[string]interface{}{
+			"User": page_user,
+			"Posts": posts,
+			"ApplicationState": app.genAppState(r),
+		}
+
+		tmplUser.Execute(w, data)
     })
 
 	r.HandleFunc("/upload/post/{uuid}", func(w http.ResponseWriter, r *http.Request) {
@@ -139,26 +202,87 @@ func main() {
 			w.Write([]byte(("Invalid cookie")))
 			return
 		}
-		tmplSubmit.Execute(w, nil)
+
+		data := map[string]interface{}{
+			"ApplicationState": app.genAppState(r),
+		}
+
+		tmplSubmit.Execute(w, data)
 	})
 
-	r.HandleFunc("/likePost", func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/likePost/{uuid}", func(w http.ResponseWriter, r *http.Request) {
 		cookie, err := r.Cookie("auth")
 		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
 			w.Write([]byte(("Sign in to like")))
 			return
 		}
-		if _, err := app.validateCookie(cookie.Value); err != nil {
+		user, err := app.validateCookie(cookie.Value)
+		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
 			w.Write([]byte(("Invalid cookie")))
 			return
 		}
-		
-	})
+
+		vars := mux.Vars(r)
+		post, err := app.getPostByUUID(vars["uuid"])
+
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Provide a valid post to like"))
+			return
+		}
+
+		err = app.likePost(post, user)
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Failed to like post"))
+			return
+		}
+
+		w.WriteHeader(http.StatusCreated)
+	}).Methods("POST")
+
+	r.HandleFunc("/removeLike/{uuid}", func(w http.ResponseWriter, r *http.Request) {
+		cookie, err := r.Cookie("auth")
+		if err != nil {
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte(("Sign in to remove like")))
+			return
+		}
+		user, err := app.validateCookie(cookie.Value)
+		if err != nil {
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte(("Invalid cookie")))
+			return
+		}
+
+		vars := mux.Vars(r)
+		post, err := app.getPostByUUID(vars["uuid"])
+
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Provide a valid post to remove like"))
+			return
+		}
+
+		err = app.removeLike(post, user)
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Failed to remove like"))
+			return
+		}
+
+		w.WriteHeader(http.StatusNoContent)
+	}).Methods("POST")
 
 	r.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
-		tmplLogin.Execute(w, nil)
+		data := map[string]interface{}{
+			"ApplicationState": app.genAppState(r),
+		}
+		tmplLogin.Execute(w, data)
 	})
 
 	r.HandleFunc("/loginSubmit", func(w http.ResponseWriter, r *http.Request) {
@@ -215,7 +339,10 @@ func main() {
 	})
 
 	r.HandleFunc("/signup", func(w http.ResponseWriter, r *http.Request) {
-		tmplSignUp.Execute(w, nil)
+		data := map[string]interface{}{
+			"ApplicationState": app.genAppState(r),
+		}
+		tmplSignUp.Execute(w, data)
 	})
 
 	r.HandleFunc("/signupForm", func(w http.ResponseWriter, r *http.Request) {
@@ -226,7 +353,6 @@ func main() {
 		handle := r.FormValue("handle")
 		name := r.FormValue("name")
 		password := r.FormValue("password")
-		location := r.FormValue("location")
 		bio := r.FormValue("bio")
 
 		if handle == "" {
@@ -252,9 +378,6 @@ func main() {
 			Handle: handle,
 		}
 
-		if location != "" {
-			user.Location = location
-		}
 		if bio != "" {
 			user.Bio = bio
 		}
@@ -313,6 +436,14 @@ func main() {
 
 		post.UserUUID = user.UUID
 		post.UserName = user.Name
+		
+		file, _, err := r.FormFile("thumbnail")
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Insert an image"))
+			return
+		}
+		defer file.Close()
 
 		post_uuid, err := app.createPost(post)
 		if err != nil {
@@ -321,11 +452,6 @@ func main() {
 			return
 		}
 
-		file, _, err := r.FormFile("thumbnail")
-		if err != nil {
-			panic(err)
-		}
-		defer file.Close()
 
 		f, err := os.OpenFile("upload/post/" + post_uuid, os.O_WRONLY|os.O_CREATE, 0666)
 		if err != nil {
@@ -337,5 +463,6 @@ func main() {
 		http.Redirect(w, r, "/post/" + post_uuid, http.StatusSeeOther)
 
 	})
-    http.ListenAndServe(":8080", nil)
+
+	http.ListenAndServe(":8080", nil)
 }

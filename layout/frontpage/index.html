@@ -10,7 +10,7 @@
     <script defer src="/public/main.js"></script>
 </head>
 <body>
-    {{template "topbar" .}}
+    {{template "topbar" .ApplicationState}}
 
     {{range .TopPosts}}
         {{template "postcard" .}}

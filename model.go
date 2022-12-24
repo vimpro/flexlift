@@ -5,7 +5,6 @@ package main
 type User struct {
 	Name string
 	Handle string `gorm:"unique"`
-	Location string
 	Bio string
 
 	UUID string `gorm:"unique"`
@@ -29,17 +28,13 @@ type Post struct {
 	
 	UserUUID string
 	UserName string
+
+	Liked bool `gorm:"-"` //shitty hack for passing thru to postcard template
 }
 
 type ApplicationState struct {
 	SignedIn bool
 	UUID string //uuid that is signed in right now
-	Cookie string
-}
-
-type FrontPageTmpl struct {
-	TopPosts []Post
-	ApplicationState
 }
 
 type Auth struct {

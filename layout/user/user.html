@@ -10,14 +10,20 @@
     <script defer src="/public/main.js"></script>
 </head>
 <body>
-    {{ template "topbar" .}}
+    {{ template "topbar" .ApplicationState}}
 
     <article class="post-card">    
-        <h2>{{.Name}}</h2>
-        <h3>@{{.Handle}}</h3>
-        <h3>From {{.Location}}</h3>
+        <h2>{{.User.Name}}</h2>
+        <h3>@{{.User.Handle}}</h3>
 
-        <p>{{.Bio}}</p>
+        <p>{{.User.Bio}}</p>
     </article>
+
+    <hr>
+
+    {{range .Posts}}
+        {{template "postcard" .}}
+    {{end}}
+
 </body>
 </html>

@@ -15,24 +15,24 @@
                 fetch("/handleExists/"+field)
                     .then(response => response.text())
                     .then((data) => {
-                            if (data === "true") {
-                                // the handle exists
-                                warning.hidden = false
-                                warning.style.color = "red"
-                                warning.innerText = "That handle is already taken :("
-                            } else if (data === "false") {
-                                // the handle is availible
-                                warning.hidden = false
-                                warning.style.color = "lime"
-                                warning.innerText = "That handle is availible!"
-                            }
-                        })
-                    }
+                        if (data === "true") {
+                            // the handle exists
+                            warning.hidden = false
+                            warning.style.color = "red"
+                            warning.innerText = "That handle is already taken :("
+                        } else if (data === "false") {
+                            // the handle is availible
+                            warning.hidden = false
+                            warning.style.color = "lime"
+                            warning.innerText = "That handle is available!"
+                        }
+                    })
                 }
+            }
     </script>
 </head>
 <body>
-    {{ template "topbar" . }}
+    {{ template "topbar" .ApplicationState }}
     
     <h1>Sign Up</h1>
     
@@ -51,15 +51,13 @@
         <input type="password" id="password" name="password">
         <br>
 
-        <label for="location">Location (optional):</label>
-        <input type="text" id="location" name="location">
-        <br>
-
         <label for="bio">Bio (optional):</label>
         <input type="text" id="bio" name="bio">
         <br>
 
         <input type="submit">
-    </form>    
+    </form>
+
+    <a href="/login">Already have an account?</a>
 </body>
 </html>
