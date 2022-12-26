@@ -11,6 +11,11 @@
             <a href="/user/{{.UUID}}" style="float:right">
                 <h2>My profile</h2>
             </a>
+            {{if .Moderator}}
+                <a href="/admin" style="float:right">
+                    <h2>Admin Page</h2>
+                </a>
+            {{end}}
         {{else}}
             <script>window.signedIn = false</script>
             <a href="/login" style="float: right;">

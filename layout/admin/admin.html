@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flexlift</title>
+
+    <link rel="stylesheet" href="/public/main.css">
+</head>
+<body>
+    {{template "topbar" .ApplicationState}}
+
+    <article>
+        <table border="1">
+            <tr>
+                <th>Title</th>
+                <th>Description</th>
+                <th>IsPr</th>
+                <th>Weight</th>
+                <th>Lift</th>
+                <th>UUID</th>
+                <th>Likes</th>
+                <th>UserUUID</th>
+                <th>UserName</th>
+                <th>Delete</th>
+            </tr>
+            {{range .Posts}}
+            <tr id="{{.UUID}}">
+                <td>{{.Title}}</td>
+                <td>{{.Description}}</td>
+                <td>{{.IsPr}}</td>
+                <td>{{.Weight}}</td>
+                <td>{{.Lift}}</td>
+                <td>{{.UUID}}</td>
+                <td>{{.Likes}}</td>
+                <td>{{.UserUUID}}</td>
+                <td>{{.UserName}}</td>
+                <td><button onclick="delPost(this)">Delete</button></td>
+            </tr>
+            {{end}}
+        </table>
+    </article>
+
+    <article>
+        <table border="1">
+            <tr>
+                <th>Name</th>
+                <th>Handle</th>
+                <th>Bio</th>
+                <th>UUID</th>
+                <th>Moderator</th>
+                <th>Delete</th>
+            </tr>
+            {{range .Users}}
+            <tr id="{{.UUID}}">
+                <td>{{.Name}}</td>
+                <td>{{.Handle}}</td>
+                <td>{{.Bio}}</td>
+                <td>{{.UUID}}</td>
+                <td>{{.Moderator}}</td>
+                <td><button onclick="delUser(this)">Delete</button></td>
+            </tr>
+            {{end}}
+        </table>
+    </article>
+</body>
+</html>
+
+<script>
+    function delPost(element) {
+        let row = element.parentElement.parentElement
+        let id = row.id
+        fetch(`/deletePost/${id}`, {method: "POST"})
+
+        row.parentElement.removeChild(row)
+    }
+
+    function delUser(element) {
+        let row = element.parentElement.parentElement
+        let id = row.id
+        fetch(`/deleteUser/${id}`, {method: "POST"})
+
+        row.parentElement.removeChild(row)
+    }
+</script>

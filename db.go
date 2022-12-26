@@ -48,6 +48,33 @@ func (a App) getUserByUUID(UUID string) (User, error) {
 	return user, err
 }
 
+//Returns list of users
+func (a App) getUsers(Limit int, Offset int) ([]User, error) {
+	var users []User
+
+	err := a.DB.Table("Users").Offset(Offset).Limit(Limit).Find(&users).Error
+
+	return users, err
+}
+
+//Delete the user
+func (a App) deleteUser(user User) error {
+	err := a.DB.Table("Users").Where("uuid = ?", user.UUID).Delete(&User{}).Error
+	if err != nil {
+		return err
+	}
+	err = a.DB.Table("Auth").Where("user_uuid = ?", user.UUID).Delete(&Auth{}).Error
+	if err != nil {
+		return err
+	}
+	err = a.DB.Table("Posts").Where("user_uuid = ?", user.UUID).Delete(&Post{}).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // Returns the post UUID
 func (a App) createPost(post Post) (string, error) {
 	id := uuid.New()
@@ -56,6 +83,20 @@ func (a App) createPost(post Post) (string, error) {
 	err := a.DB.Table("Posts").Create(post).Error
 
 	return post.UUID, err
+}
+
+//Delete the post
+func (a App) deletePost(post Post) error {
+	err := a.DB.Table("Posts").Where("uuid = ?", post.UUID).Delete(&Post{}).Error
+	if err != nil {
+		return err
+	}
+	err = a.DB.Table("Likes").Where("post_uuid = ?", post.UUID).Delete(&Like{}).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // Returns a Post object

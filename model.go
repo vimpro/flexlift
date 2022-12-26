@@ -8,6 +8,8 @@ type User struct {
 	Bio string
 
 	UUID string `gorm:"unique"`
+
+	Moderator bool
 }
 
 type Like struct {
@@ -35,6 +37,7 @@ type Post struct {
 type ApplicationState struct {
 	SignedIn bool
 	UUID string //uuid that is signed in right now
+	Moderator bool //currently signed in user is moderator?
 }
 
 type Auth struct {

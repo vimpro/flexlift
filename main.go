@@ -40,6 +40,7 @@ func (a App) genAppState(r *http.Request) ApplicationState {
 	if isLoggedIn {
 		data.SignedIn = true
 		data.UUID = user.UUID
+		data.Moderator = user.Moderator
 	} else {
 		data.SignedIn = false
 	}
@@ -72,6 +73,7 @@ func main() {
     tmplLogin := template.Must(template.ParseFiles("layout/upload/login.html", postcard, topbar))
     tmplNotFound := template.Must(template.ParseFiles("layout/404.html", postcard, topbar))
 	tmplSignUp := template.Must(template.ParseFiles("layout/upload/signup.html", postcard, topbar))
+	tmplAdmin := template.Must(template.ParseFiles("layout/admin/admin.html", postcard, topbar))
 
 	r := mux.NewRouter()
 	app.NotFoundHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -462,6 +464,103 @@ func main() {
 
 		http.Redirect(w, r, "/post/" + post_uuid, http.StatusSeeOther)
 
+	})
+
+	r.HandleFunc("/deleteUser/{uuid}", func(w http.ResponseWriter, r *http.Request) {
+		appstate := app.genAppState(r)
+		vars := mux.Vars(r)
+
+		if !appstate.SignedIn {
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte(("Sign in to delete users")))
+			return
+		}
+
+		user, err := app.getUserByUUID(vars["uuid"])
+
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Provide a valid user to delete"))
+			return
+		}
+
+		if user.UUID != appstate.UUID && !appstate.Moderator {
+			w.WriteHeader(http.StatusForbidden)
+			w.Write([]byte("Must be owner to delete"))
+			return
+		}
+
+		err = app.deleteUser(user)
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Failed to delete post"))
+			return
+		}
+
+		w.WriteHeader(http.StatusNoContent)
+	}).Methods("POST")
+
+	r.HandleFunc("/deletePost/{uuid}", func(w http.ResponseWriter, r *http.Request) {
+		appstate := app.genAppState(r)
+		vars := mux.Vars(r)
+
+		if !appstate.SignedIn {
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte(("Sign in to delete posts")))
+			return
+		}
+
+		post, err := app.getPostByUUID(vars["uuid"])
+
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Provide a valid post to delete"))
+			return
+		}
+
+		if post.UserUUID != appstate.UUID && !appstate.Moderator {
+			w.WriteHeader(http.StatusForbidden)
+			w.Write([]byte("Must be owner to delete"))
+			return
+		}
+
+		err = app.deletePost(post)
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Failed to delete post"))
+			return
+		}
+
+		w.WriteHeader(http.StatusNoContent)
+	}).Methods("POST")
+
+	r.HandleFunc("/admin", func(w http.ResponseWriter, r *http.Request) {
+		appstate := app.genAppState(r)
+
+		if !appstate.SignedIn || !appstate.Moderator {
+			app.NotFoundHandler(w, r)
+			return
+		}
+
+		posts, err := app.getTopPosts(10, 0)
+		if err != nil {
+			posts = make([]Post, 0)
+		}
+
+		users, err := app.getUsers(10, 0)
+		if err != nil {
+			users = make([]User, 0)
+		}
+
+		data := map[string]interface{}{
+			"ApplicationState": appstate,
+			"Posts": posts,
+			"Users": users,
+		}
+
+		tmplAdmin.Execute(w, data)
 	})
 
 	http.ListenAndServe(":8080", nil)
