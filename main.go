@@ -41,6 +41,7 @@ func (a App) genAppState(r *http.Request) ApplicationState {
 		data.SignedIn = true
 		data.UUID = user.UUID
 		data.Moderator = user.Moderator
+		data.UserName = user.Name
 	} else {
 		data.SignedIn = false
 	}
@@ -62,6 +63,7 @@ func main() {
 	app.DB.Table("Posts").AutoMigrate(&Post{})
 	app.DB.Table("Auth").AutoMigrate(&Auth{})
 	app.DB.Table("Likes").AutoMigrate(&Like{})
+	app.DB.Table("Comments").AutoMigrate(&Comment{})
 
 	postcard := "layout/templates/postcard.html"
 	topbar := "layout/templates/topbar.html"
@@ -157,8 +159,14 @@ func main() {
 			}
 		}
 
+		comments, err := app.getCommentsByPost(post, 10, 0)
+		if err != nil {
+			comments = make([]Comment, 0)
+		}
+
 		data := map[string]interface{}{
 			"Post": post,
+			"Comments": comments,
 			"ApplicationState": app.genAppState(r),
 		}
 
@@ -439,6 +447,31 @@ func main() {
 		http.Redirect(w, r, "/user/" + uuid, http.StatusSeeOther)
 	}).Methods("POST")
 
+	r.HandleFunc("/submitComment", func(w http.ResponseWriter, r *http.Request) {
+		appstate := app.genAppState(r)
+		if !appstate.SignedIn {
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte("Sign in to comment"))
+			return
+		}
+
+		var comment Comment
+
+		comment.Content = r.FormValue("content")
+		comment.PostUUID = r.FormValue("post")
+		comment.UserUUID = appstate.UUID
+		comment.UserName = appstate.UserName
+
+		_, err := app.createComment(comment)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Failed to create comment"))
+			return
+		}
+
+		http.Redirect(w, r, "/post/" + comment.PostUUID, http.StatusSeeOther)	
+	})
+
 	r.HandleFunc("/submitPost", func(w http.ResponseWriter, r *http.Request) {
 		cookie, err := r.Cookie("auth")
 		if err != nil {
@@ -562,6 +595,41 @@ func main() {
 		w.WriteHeader(http.StatusNoContent)
 	}).Methods("POST")
 
+	r.HandleFunc("/deleteComment/{uuid}", func(w http.ResponseWriter, r *http.Request) {
+		appstate := app.genAppState(r)
+		vars := mux.Vars(r)
+
+		if !appstate.SignedIn {
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte(("Sign in to delete comments")))
+			return
+		}
+
+		comment, err := app.getCommentByUUID(vars["uuid"])
+
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Provide a valid comment to delete"))
+			return
+		}
+
+		if comment.UserUUID != appstate.UUID && !appstate.Moderator {
+			w.WriteHeader(http.StatusForbidden)
+			w.Write([]byte("Must be owner to delete"))
+			return
+		}
+
+		err = app.deleteComment(comment)
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Failed to delete comment"))
+			return
+		}
+
+		w.WriteHeader(http.StatusNoContent)
+	}).Methods("POST")
+
 	r.HandleFunc("/admin", func(w http.ResponseWriter, r *http.Request) {
 		appstate := app.genAppState(r)
 
@@ -580,10 +648,16 @@ func main() {
 			users = make([]User, 0)
 		}
 
+		comments, err := app.getAllComments(10, 0)
+		if err != nil {
+			comments = make([]Comment, 0)
+		}
+
 		data := map[string]interface{}{
 			"ApplicationState": appstate,
 			"Posts": posts,
 			"Users": users,
+			"Comments": comments,
 		}
 
 		tmplAdmin.Execute(w, data)

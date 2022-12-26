@@ -15,6 +15,14 @@ type User struct {
 type Like struct {
 	PostUUID string
 	UserUUID string
+}
+
+type Comment struct {
+	Content string
+	UUID string
+
+	PostUUID string
+	UserUUID string
 	UserName string
 }
 
@@ -26,6 +34,7 @@ type Post struct {
 	Lift string
 	UUID string `gorm:"unique"`
 	Likes int
+	Comments int
 	
 	UserUUID string
 	UserName string
@@ -37,6 +46,7 @@ type Post struct {
 type ApplicationState struct {
 	SignedIn bool
 	UUID string //uuid that is signed in right now
+	UserName string
 	Moderator bool //currently signed in user is moderator?
 }
 

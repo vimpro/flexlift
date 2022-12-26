@@ -9,6 +9,7 @@
 
         <p>{{.Weight}} lbs on {{.Lift}}</p>
         <p id="likeCounter" count="{{.Likes}}">{{.Likes}} likes</p>
+        <p id="commentCounter" count="{{.Comments}}">{{.Comments}} comments</p>
 
         {{if .Liked}}
             <button onclick="like(this)" id="like" class="liked">Remove like</button>

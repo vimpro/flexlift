@@ -13,5 +13,30 @@
     {{template "topbar" .ApplicationState}} 
 
     {{template "postcard" .Post}} 
+
+    <br>
+
+    <article class="post-card">
+        <form action="/submitComment" method="POST">
+            <label for="content">Comment:</label>
+            <br>
+            <textarea id="content" name="content" rows="4" cols="50"></textarea>
+            <br>
+        
+            <input type="submit">
+            <input type="hidden" name="post" value="{{.Post.UUID}}" />
+        </form>
+    </article>
+
+    <br>
+
+    {{range .Comments}}
+        <article class="post-card" style="border-left: 5px solid #ffffff; padding-left: 5px">
+            <a href="/user/{{.UserUUID}}">
+                <h3>{{.UserName}}</h3>
+            </a>
+            <span>{{.Content}}</span>
+        </article>
+    {{end}}
 </body>
 </html>

@@ -63,5 +63,37 @@
             {{end}}
         </table>
     </article>
+
+    <article>
+        <table border="1">
+            <tr>
+                <th>Content</th>
+                <th>UUID</th>
+                <th>PostUUID</th>
+                <th>UserUUID</th>
+                <th>UserName</th>
+                <th>Delete</th>
+            </tr>
+            {{range .Comments}}
+            <tr id="{{.UUID}}">
+                <td>{{.Content}}</td>
+                <td>{{.UUID}}</td>
+                <td>{{.PostUUID}}</td>
+                <td>{{.UserUUID}}</td>
+                <td>{{.UserName}}</td>
+                <td><button onclick="delComment(this)">Delete</button></td>
+            </tr>
+            {{end}}
+        </table>
+    </article>
 </body>
 </html>
+
+<script>
+    function delComment(element) {
+        let row = element.parentElement.parentElement
+        id = row.id
+        row.parentElement.removeChild(row)
+        fetch(`/deleteComment/${id}`, {method: "POST"})
+    }
+</script>

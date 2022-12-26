@@ -99,6 +99,12 @@ func (a App) deletePost(post Post) error {
 	return nil
 }
 
+func (a App) deleteComment(comment Comment) error {
+	err := a.DB.Table("Comments").Where("uuid = ?", comment.UUID).Delete(&Comment{}).Error
+
+	return err
+}
+
 // Returns a Post object
 func (a App) getPostByUUID(UUID string) (Post, error) {
 	var post Post
@@ -117,12 +123,20 @@ func (a App) getPostsByUser(user User, Limit int, Offset int) ([]Post, error) {
 	return posts, err
 }
 
+func (a App) getAllComments(Limit int, Offset int) ([]Comment, error) {
+	var comments []Comment
+
+	err := a.DB.Table("Comments").Offset(Offset).Limit(Limit).Find(&comments).Error
+
+	return comments, err
+}
+
 //Like a post
 func (a App) likePost(post Post, user User) error {
 	var has_liked Like
 	err := a.DB.Table("Likes").First(&has_liked, "post_uuid = ? AND user_uuid = ?", post.UUID, user.UUID).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		err := a.DB.Table("Likes").Create(&Like{UserUUID: user.UUID, UserName: user.Name, PostUUID: post.UUID}).Error
+		err := a.DB.Table("Likes").Create(&Like{UserUUID: user.UUID, PostUUID: post.UUID}).Error
 		if err != nil {
 			return err
 		}
@@ -184,6 +198,41 @@ func (a App) getTopPosts(Limit int, Offset int) ([]Post, error) {
 	err := a.DB.Table("Posts").Offset(Offset).Limit(Limit).Order("likes DESC").Find(&posts).Error
 
 	return posts, err
+}
+
+func (a App) createComment(comment Comment) (string, error) {
+	id := uuid.New()
+	comment.UUID = id.String()
+
+	err := a.DB.Table("Comments").Create(&comment).Error
+
+	if err != nil {
+		return "", err
+	}
+
+	err = a.DB.Table("Posts").Where("UUID = ?", comment.PostUUID).UpdateColumn("Comments", gorm.Expr("Comments + ?", 1)).Error
+
+	if err != nil {
+		return "", err
+	}
+
+	return comment.UUID, nil
+}
+
+func (a App) getCommentsByPost(post Post, Limit int, Offset int) ([]Comment, error) {
+	var comments []Comment
+
+	err := a.DB.Table("Comments").Where("post_uuid = ?", post.UUID).Offset(Offset).Limit(Limit).Find(&comments).Error
+
+	return comments, err
+}
+
+func (a App) getCommentByUUID(UUID string) (Comment, error) {
+	var comment Comment
+
+	err := a.DB.Table("Comments").First(&comment, "uuid = ?", UUID).Error
+
+	return comment, err
 }
 
 // Auth functions
