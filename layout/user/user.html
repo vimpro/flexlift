@@ -17,6 +17,12 @@
         <h3>@{{.User.Handle}}</h3>
 
         <p>{{.User.Bio}}</p>
+
+        {{if eq .ApplicationState.UUID .User.UUID }}
+            <button onclick="delUser(this, false)">Delete</button>
+        {{else if .ApplicationState.Moderator}}
+            <button onclick="delUser(this, false)">Delete</button>
+        {{end}}
     </article>
 
     <hr>
@@ -24,6 +30,10 @@
     {{range .Posts}}
         {{template "postcard" .}}
     {{end}}
+
+    <script>
+        
+    </script>
 
 </body>
 </html>

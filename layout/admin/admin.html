@@ -7,6 +7,7 @@
     <title>Flexlift</title>
 
     <link rel="stylesheet" href="/public/main.css">
+    <script src="/public/main.js" defer></script>
 </head>
 <body>
     {{template "topbar" .ApplicationState}}
@@ -16,7 +17,6 @@
             <tr>
                 <th>Title</th>
                 <th>Description</th>
-                <th>IsPr</th>
                 <th>Weight</th>
                 <th>Lift</th>
                 <th>UUID</th>
@@ -29,14 +29,13 @@
             <tr id="{{.UUID}}">
                 <td>{{.Title}}</td>
                 <td>{{.Description}}</td>
-                <td>{{.IsPr}}</td>
                 <td>{{.Weight}}</td>
                 <td>{{.Lift}}</td>
                 <td>{{.UUID}}</td>
                 <td>{{.Likes}}</td>
                 <td>{{.UserUUID}}</td>
                 <td>{{.UserName}}</td>
-                <td><button onclick="delPost(this)">Delete</button></td>
+                <td><button onclick="delPost(this, true)">Delete</button></td>
             </tr>
             {{end}}
         </table>
@@ -59,28 +58,10 @@
                 <td>{{.Bio}}</td>
                 <td>{{.UUID}}</td>
                 <td>{{.Moderator}}</td>
-                <td><button onclick="delUser(this)">Delete</button></td>
+                <td><button onclick="delUser(this, true)">Delete</button></td>
             </tr>
             {{end}}
         </table>
     </article>
 </body>
 </html>
-
-<script>
-    function delPost(element) {
-        let row = element.parentElement.parentElement
-        let id = row.id
-        fetch(`/deletePost/${id}`, {method: "POST"})
-
-        row.parentElement.removeChild(row)
-    }
-
-    function delUser(element) {
-        let row = element.parentElement.parentElement
-        let id = row.id
-        fetch(`/deleteUser/${id}`, {method: "POST"})
-
-        row.parentElement.removeChild(row)
-    }
-</script>

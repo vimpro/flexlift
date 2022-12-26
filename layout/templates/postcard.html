@@ -7,10 +7,6 @@
 
         <img src="/upload/post/{{.UUID}}" alt="Lift by {{.UserName}}" class="thumbnail">
 
-        {{if .IsPr}}
-            <p>Pr!</p>
-        {{end}}
-
         <p>{{.Weight}} lbs on {{.Lift}}</p>
         <p id="likeCounter" count="{{.Likes}}">{{.Likes}} likes</p>
 
@@ -23,10 +19,9 @@
         <a href="/user/{{.UserUUID}}">
             <strong>By {{.UserName}}</strong>
         </a>
+
+        {{if .Owner}}
+            <button onclick="delPost(this, false)">Delete</button>
+        {{end}}
     </article>
-    <style>
-        .liked {
-            background-color: red;
-        }
-    </style>
 {{ end }}

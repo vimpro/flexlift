@@ -110,6 +110,11 @@ func main() {
 					fmt.Println("Failed to get like count")
 				}
 				post.Liked = liked
+				if post.UserUUID == appstate.UUID || appstate.Moderator {
+					post.Owner = true
+				} else {
+					post.Owner = false
+				}
 				best[i] = post
 			}
 		}
@@ -145,6 +150,11 @@ func main() {
 				fmt.Println("Failed to get like count")
 			}
 			post.Liked = liked
+			if post.UserUUID == appstate.UUID || appstate.Moderator {
+				post.Owner = true
+			} else {
+				post.Owner = false
+			}
 		}
 
 		data := map[string]interface{}{
@@ -426,11 +436,6 @@ func main() {
 
 		post.Title = r.FormValue("title")
 		post.Description = r.FormValue("description")
-		if r.FormValue("ispr") != "" {
-			post.IsPr = true
-		} else {
-			post.IsPr = false
-		}
 
 		temp_weight, _ := strconv.Atoi(r.FormValue("weight"))
 		post.Weight = int(temp_weight)

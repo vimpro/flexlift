@@ -22,7 +22,6 @@ type Post struct {
 	Title string
 	Description string
 	
-	IsPr bool
 	Weight int
 	Lift string
 	UUID string `gorm:"unique"`
@@ -32,6 +31,7 @@ type Post struct {
 	UserName string
 
 	Liked bool `gorm:"-"` //shitty hack for passing thru to postcard template
+	Owner bool `gorm:"-"` //same shit
 }
 
 type ApplicationState struct {

@@ -31,3 +31,19 @@ function like(element) {
     }
     likeCounter.setAttribute('count', count.toString())
 }
+
+function delPost(element, del) {
+    let row = element.parentElement.parentElement
+    let id = row.id
+    fetch(`/deletePost/${id}`, {method: "POST"})
+    
+    if (del) row.parentElement.removeChild(row)
+}
+
+function delUser(element, del) {
+    let row = element.parentElement.parentElement
+    let id = row.id
+    fetch(`/deleteUser/${id}`, {method: "POST"})
+
+    if (del) row.parentElement.removeChild(row)
+}
