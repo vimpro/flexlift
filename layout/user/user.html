@@ -15,13 +15,17 @@
     <article class="post-card" id="{{.User.UUID}}">    
         <h2>{{.User.Name}}</h2>
         <h3>@{{.User.Handle}}</h3>
-
+        
         <p>{{.User.Bio}}</p>
-
+        
         {{if eq .ApplicationState.UUID .User.UUID }}
-            <button onclick="delUser(this, false)">Delete</button>
+        <button onclick="delUser(this, false)">Delete</button>
         {{else if .ApplicationState.Moderator}}
-            <button onclick="delUser(this, false)">Delete</button>
+        <button onclick="delUser(this, false)">Delete</button>
+        {{end}}
+        
+        {{if .User.Moderator}}
+            <span style="color: darkslategrey">Moderator</span>
         {{end}}
     </article>
 

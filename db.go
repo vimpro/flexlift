@@ -181,7 +181,7 @@ func (a App) getLike(post Post, user User) (bool, error) {
 func (a App) getTopPosts(Limit int, Offset int) ([]Post, error) {
 	var posts []Post
 
-	err := a.DB.Table("Posts").Offset(Offset).Limit(Limit).Find(&posts).Error
+	err := a.DB.Table("Posts").Offset(Offset).Limit(Limit).Order("likes DESC").Find(&posts).Error
 
 	return posts, err
 }
