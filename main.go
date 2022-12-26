@@ -168,6 +168,7 @@ func main() {
 
 	r.HandleFunc("/user/{uuid}", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
+		appstate := app.genAppState(r)
 
 		page_user, err := app.getUserByUUID(vars["uuid"])
 		if err != nil {
@@ -181,10 +182,30 @@ func main() {
 			posts = make([]Post, 0)
 		}
 
+		if appstate.SignedIn {
+			user, err := app.getUserByUUID(appstate.UUID)
+			if err != nil {
+				fmt.Println("Failed to create user object from UUID")
+			}
+			for i, post := range posts {
+				liked, err := app.getLike(post, user)
+				if err != nil {
+					fmt.Println("Failed to get like count")
+				}
+				post.Liked = liked
+				if post.UserUUID == appstate.UUID || appstate.Moderator {
+					post.Owner = true
+				} else {
+					post.Owner = false
+				}
+				posts[i] = post
+			}
+		}
+
 		data := map[string]interface{}{
 			"User": page_user,
 			"Posts": posts,
-			"ApplicationState": app.genAppState(r),
+			"ApplicationState": appstate,
 		}
 
 		tmplUser.Execute(w, data)

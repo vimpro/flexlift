@@ -12,7 +12,7 @@
 <body>
     {{ template "topbar" .ApplicationState}}
 
-    <article class="post-card">    
+    <article class="post-card" id="{{.User.UUID}}">    
         <h2>{{.User.Name}}</h2>
         <h3>@{{.User.Handle}}</h3>
 

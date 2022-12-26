@@ -33,17 +33,30 @@ function like(element) {
 }
 
 function delPost(element, del) {
-    let row = element.parentElement.parentElement
-    let id = row.id
-    fetch(`/deletePost/${id}`, {method: "POST"})
-    
-    if (del) row.parentElement.removeChild(row)
+    let id
+    if (del) {
+        let row = element.parentElement.parentElement
+        id = row.id
+        row.parentElement.removeChild(row)
+        fetch(`/deletePost/${id}`, {method: "POST"})
+    } else {
+        id = element.parentElement.id
+        fetch(`/deletePost/${id}`, {method: "POST"})
+        window.location = "/"
+    }
 }
 
 function delUser(element, del) {
-    let row = element.parentElement.parentElement
-    let id = row.id
-    fetch(`/deleteUser/${id}`, {method: "POST"})
+    let id
+    if (del) {
+        let row = element.parentElement.parentElement
+        id = row.id
+        row.parentElement.removeChild(row)
+        fetch(`/deleteUser/${id}`, {method: "POST"})
+    } else {
+        id = element.parentElement.id
+        fetch(`/deleteUser/${id}`, {method: "POST"})
+        window.location = "/"
+    }
 
-    if (del) row.parentElement.removeChild(row)
 }
