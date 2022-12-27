@@ -8,23 +8,23 @@
             <a href="/submit" style="display: inline-block;">
                 <h2>Submit Post</h2>
             </a>
-            <a style="float: right;" href="javascript:fetch(`/logOut`, {method: 'POST'});window.location='/'">
+            <a style="float: right; padding-left: 5px;" href="javascript:fetch(`/logOut`, {method: 'POST'});window.location='/'">
                 <h2>Log Out</h2>
             </a>
-            <a href="/user/{{.UUID}}" style="float:right">
+            <a href="/user/{{.UUID}}" style="float:right; padding-left: 5px;">
                 <h2>My profile</h2>
             </a>
             {{if .Moderator}}
-                <a href="/admin" style="float:right">
+                <a href="/admin" style="float:right; padding-left: 5px;">
                     <h2>Admin Page</h2>
                 </a>
             {{end}}
         {{else}}
             <script>window.signedIn = false</script>
-            <a href="/login" style="float: right;">
+            <a href="/login" style="float: right; padding-left: 5px;">
                 <h2>Log In</h2>
             </a>
-            <a href="/signup" style="float: right;">
+            <a href="/signup" style="float: right; padding-left: 5px;">
                 <h2>Sign Up</h2>
             </a>
         {{end}}

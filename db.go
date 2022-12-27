@@ -102,6 +102,12 @@ func (a App) deletePost(post Post) error {
 func (a App) deleteComment(comment Comment) error {
 	err := a.DB.Table("Comments").Where("uuid = ?", comment.UUID).Delete(&Comment{}).Error
 
+	if err != nil {
+		return err
+	}
+
+	err = a.DB.Table("Posts").Where("uuid = ?", comment.PostUUID).UpdateColumn("Comments", gorm.Expr("Comments - ?", 1)).Error
+
 	return err
 }
 
