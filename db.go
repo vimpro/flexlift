@@ -245,7 +245,7 @@ func (a App) signIn(UserUUID string, Password string) (string, error) {
 		return "", err
 	}
 
-	cookie := make([]byte, 16)
+	cookie := make([]byte, 64)
 	
 	rand.Seed(time.Now().UnixNano())
 	rand.Read(cookie)
@@ -275,4 +275,10 @@ func (a App) validateCookie(Cookie string) (User, error) {
 	}
 
 	return user, nil
+}
+
+func (a App) logOut(Cookie string) error {
+	err := a.DB.Table("Auth").Where("current_cookie = ?", Cookie).Update("current_cookie", gorm.Expr("NULL")).Error
+
+	return err
 }

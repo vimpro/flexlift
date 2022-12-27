@@ -60,3 +60,10 @@ function delUser(element, del) {
     }
 
 }
+
+function deleteComment(element) {
+    let box = element.parentElement
+    
+    fetch(`/deleteComment/${box.id}`, {method: "POST"})
+    box.parentElement.removeChild(box)
+}

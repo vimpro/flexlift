@@ -8,6 +8,9 @@
             <a href="/submit" style="display: inline-block;">
                 <h2>Submit Post</h2>
             </a>
+            <a style="float: right;" href="javascript:fetch(`/logOut`, {method: 'POST'});window.location='/'">
+                <h2>Log Out</h2>
+            </a>
             <a href="/user/{{.UUID}}" style="float:right">
                 <h2>My profile</h2>
             </a>

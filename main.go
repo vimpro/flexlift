@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
 	"gorm.io/driver/sqlite"
@@ -42,6 +43,7 @@ func (a App) genAppState(r *http.Request) ApplicationState {
 		data.UUID = user.UUID
 		data.Moderator = user.Moderator
 		data.UserName = user.Name
+		data.Cookie = cookie.Value
 	} else {
 		data.SignedIn = false
 	}
@@ -662,6 +664,29 @@ func main() {
 
 		tmplAdmin.Execute(w, data)
 	})
+
+	r.HandleFunc("/logOut", func(w http.ResponseWriter, r *http.Request) {
+		appstate := app.genAppState(r)
+
+		if !appstate.SignedIn {
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte("You aren't signed in!"))
+			return
+		}
+		
+		err := app.logOut(appstate.Cookie)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Failed to log out"))
+			return
+		}
+
+		http.SetCookie(w, &http.Cookie{
+			Name: "auth",
+			Value: "",
+			Expires: time.Unix(0, 0),
+		})
+	}).Methods("POST")
 
 	http.ListenAndServe(":8080", nil)
 }

@@ -31,11 +31,14 @@
     <br>
 
     {{range .Comments}}
-        <article class="post-card" style="border-left: 5px solid #ffffff; padding-left: 5px">
+        <article class="post-card" style="border-left: 5px solid #ffffff; padding-left: 5px" id="{{.UUID}}">
             <a href="/user/{{.UserUUID}}">
                 <h3>{{.UserName}}</h3>
             </a>
             <span>{{.Content}}</span>
+            {{if eq $.ApplicationState.UUID .UserUUID}}
+                <button onclick="deleteComment(this)" style="float:right">Delete</button>
+            {{end}}
         </article>
     {{end}}
 </body>

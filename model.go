@@ -48,6 +48,7 @@ type ApplicationState struct {
 	UUID string //uuid that is signed in right now
 	UserName string
 	Moderator bool //currently signed in user is moderator?
+	Cookie string
 }
 
 type Auth struct {
