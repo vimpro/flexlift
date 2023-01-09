@@ -53,6 +53,7 @@ type ApplicationState struct {
 
 type Auth struct {
 	UserUUID string
+	Email string
 	Password string //TODO: change this
 
 	CurrentCookie string

@@ -1,11 +1,80 @@
 body {
-    background-color: darkslategrey;
+    background-color: #343541;
     color: whitesmoke;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    margin: 0;
+    padding: 0;
 }
 
 .post-card {
-    background-color: grey;
+    background-color: #202123;
+    width: 75%;
+    margin: auto;
+    margin-bottom: 40px;
+    margin-top: 40px;
+    padding: 10px;
+    border-radius: 5px;
+    position: relative;
+}
+
+button {
+    background-color: transparent;
+    border: 2px solid #35383d;
+    color: #35383d;
+}
+
+.delete {
+    background-color: transparent;
+    border: 2px solid #971f1f;
+    color: #971f1f;
+    padding: 1px;
+
+    position: absolute;
+    bottom: 0;
+    right: 0;
+}
+
+.delete-admin {
+    background-color: transparent;
+    border: 2px solid #971f1f;
+    color: #971f1f;
+    padding: 1px;
+}
+
+.icon {
+    height: 1em;
+}
+
+.delete .icon {
+    height: 2em;
+    text-align: center;
+}
+
+.post-content {
+    background-color: #35383d;
+    margin: 0;
+    padding: 5px;
+    border-radius: 5px;
+    filter:drop-shadow(0 0 5px #141414);
+}
+
+.post-content a h2 {
+    margin: 0;
+}
+
+nav {
+    background-color: #202123;
+}
+
+nav a {
+    margin-right: 10px;
+
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.logo {
+    background-color: darkslategrey;
 }
 
 a {
@@ -21,6 +90,8 @@ a:hover {
 .thumbnail {
     max-width: 250px;
     max-height: 250px;
+    border-radius: 5px;
+    filter:drop-shadow(0 0 5px #141414);
 }
 .thumbnail-full {
     max-width: 100%;

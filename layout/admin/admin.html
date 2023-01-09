@@ -35,7 +35,7 @@
                 <td>{{.Likes}}</td>
                 <td>{{.UserUUID}}</td>
                 <td>{{.UserName}}</td>
-                <td><button onclick="delPost(this, true)">Delete</button></td>
+                <td><button onclick="delPost(this, true)" class="delete-admin">Delete</button></td>
             </tr>
             {{end}}
         </table>
@@ -58,7 +58,7 @@
                 <td>{{.Bio}}</td>
                 <td>{{.UUID}}</td>
                 <td>{{.Moderator}}</td>
-                <td><button onclick="delUser(this, true)">Delete</button></td>
+                <td><button onclick="delUser(this, true)" class="delete-admin">Delete</button></td>
             </tr>
             {{end}}
         </table>
@@ -81,7 +81,7 @@
                 <td>{{.PostUUID}}</td>
                 <td>{{.UserUUID}}</td>
                 <td>{{.UserName}}</td>
-                <td><button onclick="delComment(this)">Delete</button></td>
+                <td><button onclick="delComment(this)" class="delete-admin">Delete</button></td>
             </tr>
             {{end}}
         </table>

@@ -1,15 +1,27 @@
 {{ define "postcard" }}
     <article class="post-card" id="{{.UUID}}">    
-        <a href="/post/{{.UUID}}">
-            <h2>{{.Title}}</h2>
-        </a>
-        <h3>{{.Description}}</h3>
-
-        <img src="/upload/post/{{.UUID}}" alt="Lift by {{.UserName}}" class="thumbnail">
-
-        <p>{{.Weight}} lbs on {{.Lift}}</p>
-        <p id="likeCounter" count="{{.Likes}}">{{.Likes}} likes</p>
-        <p id="commentCounter" count="{{.Comments}}">{{.Comments}} comments</p>
+        <div class="post-content">
+            <a href="/post/{{.UUID}}">
+                <h2>{{.Title}}</h2>
+            </a>
+            <h3>{{.Description}}</h3>
+            
+            <img src="/upload/post/{{.UUID}}" alt="Lift by {{.UserName}}" class="thumbnail">
+        </div>
+            
+        <p>
+            <img src="/public/icons/weight-pound.svg" alt="weight-pound" class="icon">
+            <span>{{.Weight}}</span>
+            <br>
+            <img src="/public/icons/weight-lifter.svg" alt="weight-lifter" class="icon">
+            <span>{{.Lift}}</span>
+            <br>
+            <img src="/public/icons/hand-clap.svg" alt="hand-clap" class="icon">
+            <span id="likeCounter" count="{{.Likes}}">{{.Likes}} likes</span>
+            <br>
+            <img src="/public/icons/comment.svg" alt="comment" class="icon">
+            <span id="commentCounter" count="{{.Comments}}">{{.Comments}} comments</span>
+        </p>
 
         {{if .Liked}}
             <button onclick="like(this)" id="like" class="liked">Remove like</button>
@@ -22,7 +34,9 @@
         </a>
 
         {{if .Owner}}
-            <button onclick="delPost(this, false)" style="float: right;">Delete</button>
+            <button onclick="delPost(this, false)" class="delete">
+                <img src="/public/icons/trash-can.png" alt="Delete post" class="icon">
+            </button>
         {{end}}
     </article>
 {{ end }}

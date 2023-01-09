@@ -17,7 +17,7 @@
         <h3>@{{.User.Handle}}</h3>
         
         {{if eq .ApplicationState.UUID .User.UUID }}
-        <button style="float: right" onclick="delUser(this, false)">Delete</button>
+            <button style="float: right" onclick="delUser(this, false)">Delete</button>
         {{end}}
 
         <p>{{.User.Bio}}</p>

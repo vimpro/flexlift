@@ -12,9 +12,11 @@
 <body>
     {{template "topbar" .ApplicationState}}
 
-    {{range .TopPosts}}
-        {{template "postcard" .}}
-    {{end}}
+    <div class="post-container">
+        {{range .TopPosts}}
+            {{template "postcard" .}}
+        {{end}}
+    </div>
 </body>
 </html>
 
